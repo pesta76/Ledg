@@ -22,8 +22,8 @@ await upload();btn.textContent='☁ Sincronizza adesso';msg('✓ Cloud collegato
 }catch(e){msg('⚠ '+e.message)}finally{busy=false}}
 btn.onclick=async()=>{if(currentUser){enqueue();await queue;return}
 const email=prompt('Inserisci la tua email per collegare LEDG e sincronizzare i dati tra Safari e icona iPhone');if(!email)return;
-const {error}=await client.auth.signInWithOtp({email:email.trim(),options:{shouldCreateUser:true}});if(error){msg('⚠ '+error.message);return}
-const token=prompt('Controlla la tua email: inserisci il codice di verifica ricevuto (se hai ricevuto solo un link, aprilo e torna a LEDG).');if(!token){msg('Apri il link ricevuto via email per completare l’accesso');return}
+const {error}=await client.auth.signInWithOtp({email:email.trim(),options:{shouldCreateUser:true,emailRedirectTo:window.location.origin+window.location.pathname}});if(error){msg('⚠ '+error.message);return}
+const token=prompt('Se hai ricevuto un codice di verifica, inseriscilo qui. Se hai ricevuto un link, premi Annulla e apri il link dalla stessa finestra di Safari.');if(!token){msg('Apri il link nella email usando Safari. Se la pagina non si apre, torna qui e richiedi un codice.');return}
 const result=await client.auth.verifyOtp({email:email.trim(),token:token.trim(),type:'email'});if(result.error){msg('⚠ '+result.error.message);return}await connect(result.data.user)};
 const {data:session,error}=await client.auth.getSession();if(error)msg(error.message);if(session?.session?.user)await connect(session.session.user);
 client.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_IN'&&session?.user&&!currentUser)connect(session.user)});
