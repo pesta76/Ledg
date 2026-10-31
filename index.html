@@ -15,10 +15,8 @@ const originalSet=Storage.prototype.setItem;Storage.prototype.setItem=function(k
 async function connect(user){currentUser=user;btn.textContent='☁ Sincronizza adesso';msg('Connessione al cloud in corso…');busy=true;
 try{const {data:result,error}=await client.from('ledg_wallets').select('payload').eq('user_id',user.id).maybeSingle();if(error)throw error;
 const remote=result?.payload;const local=JSON.parse(localStorage.getItem(key)||'{}');
-if(remote&&Array.isArray(remote.operations)){
-if(!Array.isArray(local.operations)||!local.operations.length||confirm('Esistono dati salvati nel cloud. Caricarli su questo dispositivo? Premi Annulla per conservare quelli locali e inviarli nel cloud.')){originalSet.call(localStorage,key,JSON.stringify(remote));location.reload();return}
-}
-await upload();btn.textContent='☁ Sincronizza adesso';msg('✓ Cloud collegato: salvataggio automatico attivo');
+if(remote&&Array.isArray(remote.operations)){data=remote;originalSet.call(localStorage,key,JSON.stringify(remote));render();msg('✓ Dati caricati dal cloud');return}
+if(Array.isArray(local.operations)&&local.operations.length){await upload();msg('✓ Transazioni salvate nel cloud')}else{msg('Cloud collegato. Inserisci una nuova transazione per salvarla.')}btn.textContent='☁ Sincronizza adesso';
 }catch(e){msg('⚠ '+e.message)}finally{busy=false}}
 btn.onclick=async()=>{if(currentUser){enqueue();await queue;return}
 const email=prompt('Inserisci la tua email per collegare LEDG e sincronizzare i dati tra Safari e icona iPhone');if(!email)return;
