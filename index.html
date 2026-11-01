@@ -3,7 +3,7 @@ const $=id=>document.getElementById(id),key='ledg-data-v1',types=['Compra','Vent
 window.addEventListener('load',async()=>{
 const status=document.getElementById('saveStatus'), key='ledg-data-v1';
 const url='https://scaegubqqywpjedaibqb.supabase.co',apiKey='sb_publishable_1vQmsZI2BfZe8Qi0Wk1sWw_JmQ840nc';
-if(!window.supabase){status.textContent='⚠ Cloud non disponibile: controlla la connessione';return}
+if(!window.supabase){status.textContent='⚠ Libreria Supabase non caricata. Riapri con connessione Internet.';return}
 const client=window.supabase.createClient(url,apiKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 let currentUser=null, busy=false, queue=Promise.resolve();
 const btn=document.createElement('button');btn.textContent='☁ Accedi e sincronizza';btn.className='primary';btn.style.margin='10px 0';status.after(btn);
@@ -24,7 +24,7 @@ const email=prompt('Email per collegare LEDG al cloud');if(!email)return;
 const {error}=await client.auth.signInWithOtp({email:email.trim(),options:{shouldCreateUser:true,emailRedirectTo:window.location.origin+window.location.pathname}});
 if(error){msg('⚠ '+error.message);return}
 msg('Apri il collegamento ricevuto via email nello stesso browser. Dopo l’accesso torna a LEDG.')};
-document.addEventListener('visibilitychange',()=>{if(!document.hidden&&currentUser)connect(currentUser)});const {data:session,error}=await client.auth.getSession();if(error)msg(error.message);diagnose();if(session?.session?.user)await connect(session.session.user);else msg('⚠ Non collegato al cloud. Premi Accedi e sincronizza per conservare i dati su tutti i dispositivi.');
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&currentUser)connect(currentUser)});const {data:session,error}=await client.auth.getSession();if(error)msg(error.message);diagnose();if(session?.session?.user)await connect(session.session.user);else msg('⚠ Accesso non attivo in questo browser. Premi Accedi e sincronizza.');
 client.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_IN'&&session?.user&&!currentUser){setTimeout(()=>connect(session.user),0)}});
 });
 </script></body></html>
