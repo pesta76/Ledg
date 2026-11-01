@@ -10,7 +10,7 @@ const btn=document.createElement('button');btn.textContent='☁ Accedi e sincron
 const info=document.createElement('div');info.className='hint';btn.after(info);
 function msg(t){info.textContent=t}
 async function upload(){if(!currentUser)return;const payload=JSON.parse(localStorage.getItem(key)||'{}');const {error}=await client.from('ledg_wallets').upsert({user_id:currentUser.id,payload,updated_at:new Date().toISOString()},{onConflict:'user_id'});if(error)throw error;msg('✓ Dati sincronizzati nel cloud')}
-function enqueue(){if(!currentUser||busy)return;queue=queue.then(upload).catch(e=>msg('⚠ Sincronizzazione fallita: '+e.message))}
+function enqueue(){if(!currentUser)return;queue=queue.then(upload).catch(e=>msg('⚠ Sincronizzazione fallita: '+e.message))}
 const originalSet=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){originalSet.call(this,k,v);if(this===localStorage&&k===key)enqueue()};
 async function connect(user){currentUser=user;btn.textContent='☁ Sincronizza adesso';msg('Connessione al cloud in corso…');busy=true;
 try{const {data:result,error}=await client.from('ledg_wallets').select('payload').eq('user_id',user.id).maybeSingle();if(error)throw error;
