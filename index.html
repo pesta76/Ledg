@@ -25,6 +25,6 @@ const {error}=await client.auth.signInWithOtp({email:email.trim(),options:{shoul
 const token=prompt('Se hai ricevuto un codice di verifica, inseriscilo qui. Se hai ricevuto un link, premi Annulla e apri il link dalla stessa finestra di Safari.');if(!token){msg('Apri il link nella email usando Safari. Se la pagina non si apre, torna qui e richiedi un codice.');return}
 const result=await client.auth.verifyOtp({email:email.trim(),token:token.trim(),type:'email'});if(result.error){msg('⚠ '+result.error.message);return}await connect(result.data.user)};
 const {data:session,error}=await client.auth.getSession();if(error)msg(error.message);diagnose();if(session?.session?.user)await connect(session.session.user);else msg('⚠ Non collegato al cloud. Premi Accedi e sincronizza per conservare i dati su tutti i dispositivi.');
-client.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_IN'&&session?.user&&!currentUser)connect(session.user)});
+client.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_IN'&&session?.user&&!currentUser){setTimeout(()=>connect(session.user),0)}});
 });
 </script></body></html>
