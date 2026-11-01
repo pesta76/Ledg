@@ -20,10 +20,10 @@ if(remote&&Array.isArray(remote.operations)){if(local.operations?.length&&!remot
 if(Array.isArray(local.operations)&&local.operations.length){await upload();msg('✓ Transazioni salvate nel cloud')}else{msg('Cloud collegato. Inserisci una nuova transazione per salvarla.')}btn.textContent='☁ Sincronizza adesso';
 }catch(e){msg('⚠ '+e.message)}finally{busy=false;diagnose()}}
 btn.onclick=async()=>{if(currentUser){enqueue();await queue;return}
-const email=prompt('Inserisci la tua email per collegare LEDG e sincronizzare i dati tra Safari e icona iPhone');if(!email)return;
-const {error}=await client.auth.signInWithOtp({email:email.trim(),options:{shouldCreateUser:true,emailRedirectTo:window.location.origin+window.location.pathname}});if(error){msg('⚠ '+error.message);return}
-const token=prompt('Inserisci qui il codice ricevuto via email. Se hai ricevuto solo un link, aprilo e torna in questa finestra.');if(!token){msg('Apri il link nella email usando Safari. Se la pagina non si apre, torna qui e richiedi un codice.');return}
-const result=await client.auth.verifyOtp({email:email.trim(),token:token.trim(),type:'email'});if(result.error){msg('⚠ '+result.error.message);return}await connect(result.data.user)};
+const email=prompt('Email per collegare LEDG al cloud');if(!email)return;
+const {error}=await client.auth.signInWithOtp({email:email.trim(),options:{shouldCreateUser:true,emailRedirectTo:window.location.origin+window.location.pathname}});
+if(error){msg('⚠ '+error.message);return}
+msg('Apri il collegamento ricevuto via email nello stesso browser. Dopo l’accesso torna a LEDG.')};
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&currentUser)connect(currentUser)});const {data:session,error}=await client.auth.getSession();if(error)msg(error.message);diagnose();if(session?.session?.user)await connect(session.session.user);else msg('⚠ Non collegato al cloud. Premi Accedi e sincronizza per conservare i dati su tutti i dispositivi.');
 client.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_IN'&&session?.user&&!currentUser){setTimeout(()=>connect(session.user),0)}});
 });
