@@ -27,7 +27,7 @@ msg('Apri il collegamento ricevuto via email nello stesso browser. Dopo l’acce
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&currentUser)connect(currentUser)});const {data:session,error}=await client.auth.getSession();if(error)msg(error.message);diagnose();if(session?.session?.user)await connect(session.session.user);else if(!location.hash.includes('error='))msg('⚠ Accesso non attivo in questo browser. Premi Accedi e sincronizza.');
 client.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_IN'&&session?.user){setTimeout(()=>connect(session.user),0)}else if(event==='SIGNED_OUT'){currentUser=null;btn.textContent='☁ Accedi e sincronizza';diagnose()}});
 window.addEventListener('pageshow',async()=>{const {data:res,error:e}=await client.auth.getSession();if(e)msg('⚠ '+e.message);if(res?.session?.user&&!currentUser)await connect(res.session.user)});
-const authParams=new URLSearchParams(location.hash.slice(1));const authError=authParams.get('error_description')||authParams.get('error');if(authError){msg('⚠ Accesso email non riuscito: '+authError.replace(/\+/g,' '));btn.textContent='☁ Riprova accesso';}
+const authParams=new URLSearchParams(location.hash.slice(1));const authError=authParams.get('error_description')||authParams.get('error');if(authError){msg('⚠ Collegamento email scaduto o già utilizzato. Premi Riprova accesso e apri soltanto la NUOVA email ricevuta.');btn.textContent='☁ Riprova accesso';history.replaceState(null,'',location.pathname+location.search);}
 
 });
 </script></body></html>
