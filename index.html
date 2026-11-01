@@ -3,7 +3,7 @@ const $=id=>document.getElementById(id),key='ledg-data-v1',types=['Compra','Vent
 window.addEventListener('load',async()=>{
 const status=document.getElementById('saveStatus'), key='ledg-data-v1';
 const url='https://scaegubqqywpjedaibqb.supabase.co',apiKey='sb_publishable_1vQmsZI2BfZe8Qi0Wk1sWw_JmQ840nc';
-if(!window.supabase){status.textContent='Archivio remoto non disponibile: libreria non caricata';return}
+if(!window.supabase){status.textContent='⚠ Cloud non disponibile: controlla la connessione';return}
 const client=window.supabase.createClient(url,apiKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 let currentUser=null, busy=false, queue=Promise.resolve();
 const btn=document.createElement('button');btn.textContent='☁ Accedi e sincronizza';btn.className='primary';btn.style.margin='10px 0';status.after(btn);
@@ -15,7 +15,7 @@ const originalSet=Storage.prototype.setItem;Storage.prototype.setItem=function(k
 async function connect(user){currentUser=user;btn.textContent='☁ Sincronizza adesso';msg('Connessione al cloud in corso…');busy=true;
 try{const {data:result,error}=await client.from('ledg_wallets').select('payload').eq('user_id',user.id).maybeSingle();if(error)throw error;
 const remote=result?.payload;const local=JSON.parse(localStorage.getItem(key)||'{}');
-if(remote&&Array.isArray(remote.operations)){data=remote;originalSet.call(localStorage,key,JSON.stringify(remote));render();msg('✓ Dati caricati dal cloud');return}
+if(remote&&Array.isArray(remote.operations)){if(local.operations?.length&&!remote.operations.length){await upload();return}data=remote;originalSet.call(localStorage,key,JSON.stringify(remote));render();msg('✓ Dati caricati dal cloud');return}
 if(Array.isArray(local.operations)&&local.operations.length){await upload();msg('✓ Transazioni salvate nel cloud')}else{msg('Cloud collegato. Inserisci una nuova transazione per salvarla.')}btn.textContent='☁ Sincronizza adesso';
 }catch(e){msg('⚠ '+e.message)}finally{busy=false}}
 btn.onclick=async()=>{if(currentUser){enqueue();await queue;return}
@@ -23,7 +23,7 @@ const email=prompt('Inserisci la tua email per collegare LEDG e sincronizzare i 
 const {error}=await client.auth.signInWithOtp({email:email.trim(),options:{shouldCreateUser:true,emailRedirectTo:window.location.origin+window.location.pathname}});if(error){msg('⚠ '+error.message);return}
 const token=prompt('Se hai ricevuto un codice di verifica, inseriscilo qui. Se hai ricevuto un link, premi Annulla e apri il link dalla stessa finestra di Safari.');if(!token){msg('Apri il link nella email usando Safari. Se la pagina non si apre, torna qui e richiedi un codice.');return}
 const result=await client.auth.verifyOtp({email:email.trim(),token:token.trim(),type:'email'});if(result.error){msg('⚠ '+result.error.message);return}await connect(result.data.user)};
-const {data:session,error}=await client.auth.getSession();if(error)msg(error.message);if(session?.session?.user)await connect(session.session.user);
+const {data:session,error}=await client.auth.getSession();if(error)msg(error.message);if(session?.session?.user)await connect(session.session.user);else msg('⚠ Non collegato al cloud. Premi Accedi e sincronizza per conservare i dati su tutti i dispositivi.');
 client.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_IN'&&session?.user&&!currentUser)connect(session.user)});
 });
 </script></body></html>
