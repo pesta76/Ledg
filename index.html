@@ -23,7 +23,7 @@ btn.onclick=async()=>{if(currentUser){enqueue();await queue;return}
 const email=prompt('Email per collegare LEDG al cloud');if(!email)return;
 const {error}=await client.auth.signInWithOtp({email:email.trim(),options:{shouldCreateUser:true,emailRedirectTo:window.location.origin+window.location.pathname}});
 if(error){msg('⚠ '+error.message);return}
-msg('Apri il collegamento ricevuto via email nello stesso browser. Dopo l’accesso torna a LEDG.')};
+msg('Per evitare link scaduti serve un codice OTP di 6 cifre. Configurare il modello email Supabase prima di riprovare.')};
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&currentUser)connect(currentUser)});const {data:session,error}=await client.auth.getSession();if(error)msg(error.message);diagnose();if(session?.session?.user)await connect(session.session.user);else if(!location.hash.includes('error='))msg('⚠ Accesso non attivo in questo browser. Premi Accedi e sincronizza.');
 client.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_IN'&&session?.user){setTimeout(()=>connect(session.user),0)}else if(event==='SIGNED_OUT'){currentUser=null;btn.textContent='☁ Accedi e sincronizza';diagnose()}});
 window.addEventListener('pageshow',async()=>{const {data:res,error:e}=await client.auth.getSession();if(e)msg('⚠ '+e.message);if(res?.session?.user&&!currentUser)await connect(res.session.user)});
