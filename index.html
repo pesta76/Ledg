@@ -25,6 +25,9 @@ const {error}=await client.auth.signInWithOtp({email:email.trim(),options:{shoul
 if(error){msg('⚠ '+error.message);return}
 msg('Apri il collegamento ricevuto via email nello stesso browser. Dopo l’accesso torna a LEDG.')};
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&currentUser)connect(currentUser)});const {data:session,error}=await client.auth.getSession();if(error)msg(error.message);diagnose();if(session?.session?.user)await connect(session.session.user);else msg('⚠ Accesso non attivo in questo browser. Premi Accedi e sincronizza.');
-client.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_IN'&&session?.user&&!currentUser){setTimeout(()=>connect(session.user),0)}});
+client.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_IN'&&session?.user){setTimeout(()=>connect(session.user),0)}else if(event==='SIGNED_OUT'){currentUser=null;btn.textContent='☁ Accedi e sincronizza';diagnose()}});
+window.addEventListener('pageshow',async()=>{const {data:res,error:e}=await client.auth.getSession();if(e)msg('⚠ '+e.message);if(res?.session?.user&&!currentUser)await connect(res.session.user)});
+if(new URLSearchParams(location.hash.slice(1)).get('error_description'))msg('⚠ Accesso: '+new URLSearchParams(location.hash.slice(1)).get('error_description'));
+
 });
 </script></body></html>
